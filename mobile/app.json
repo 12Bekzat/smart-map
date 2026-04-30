@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "SafeWay",
+    "slug": "safeway-almaty",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#F6F7F2"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "kz.safeway.almaty",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "SafeWay uses location to build safer routes in Almaty."
+      }
+    },
+    "android": {
+      "package": "kz.safeway.almaty",
+      "usesCleartextTraffic": true,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-font"
+    ]
+  }
+}

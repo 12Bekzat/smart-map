@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: safeway_postgres
+    environment:
+      POSTGRES_DB: safeway
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - safeway_pgdata:/var/lib/postgresql/data
+      - ./db/migrations/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
+      - ./db/migrations/002_auth_preferences.sql:/docker-entrypoint-initdb.d/002_auth_preferences.sql:ro
+      - ./db/seeds/001_almaty_seed.sql:/docker-entrypoint-initdb.d/003_almaty_seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d safeway"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  safeway_pgdata:
