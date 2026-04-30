@@ -2,7 +2,8 @@ export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost
 export const API_FALLBACK_URLS = [
   ...(process.env.EXPO_PUBLIC_API_FALLBACK_URLS || '').split(',').map((url) => url.trim()).filter(Boolean),
   'http://10.0.2.2:4000',
-  'http://192.168.0.102:4000'
+  'http://192.168.0.102:4000',
+  'http://172.20.10.4:4000',
 ].filter((url, index, urls) => url && url !== API_BASE_URL && urls.indexOf(url) === index);
 
 export const ALMATY_REGION = {

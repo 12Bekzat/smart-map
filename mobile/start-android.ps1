@@ -13,7 +13,34 @@ if (($env:Path -split ';') -notcontains $platformTools) {
   $env:Path = "$env:Path;$platformTools"
 }
 
-$env:EXPO_PUBLIC_API_URL = 'http://127.0.0.1:4000'
+function Get-LocalApiUrl {
+  $envFile = Join-Path $PSScriptRoot '.env'
+  if (Test-Path $envFile) {
+    $configuredUrl = Get-Content $envFile |
+      Where-Object { $_ -match '^EXPO_PUBLIC_API_URL=' } |
+      Select-Object -First 1
+
+    if ($configuredUrl) {
+      $url = ($configuredUrl -replace '^EXPO_PUBLIC_API_URL=', '').Trim()
+      if ($url -and $url -notmatch '127\.0\.0\.1|localhost') {
+        return $url
+      }
+    }
+  }
+
+  $activeIp = Get-NetIPConfiguration |
+    Where-Object { $_.IPv4DefaultGateway -ne $null -and $_.NetAdapter.Status -eq 'Up' } |
+    Select-Object -ExpandProperty IPv4Address |
+    Select-Object -ExpandProperty IPAddress -First 1
+
+  if ($activeIp) {
+    return "http://$activeIp:4000"
+  }
+
+  return 'http://10.0.2.2:4000'
+}
+
+$env:EXPO_PUBLIC_API_URL = Get-LocalApiUrl
 
 function Invoke-Adb {
   param(

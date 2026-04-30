@@ -1,7 +1,7 @@
 import { API_BASE_URL, API_FALLBACK_URLS } from './config';
 
 async function request(path, options = {}) {
-  const { token, timeoutMs = 7000, ...fetchOptions } = options;
+  const { token, timeoutMs = 9000, ...fetchOptions } = options;
   const baseUrls = [API_BASE_URL, ...API_FALLBACK_URLS];
   let lastNetworkError;
   const triedUrls = [];
@@ -33,7 +33,9 @@ async function request(path, options = {}) {
         error.name !== 'AbortError' &&
         !message.includes('Network request failed') &&
         !message.includes('Failed to fetch') &&
-        !message.includes('fetch failed')
+        !message.includes('fetch failed') &&
+        !message.includes('connection is aborted') &&
+        !message.includes('aborted')
       ) {
         throw error;
       }
@@ -49,7 +51,7 @@ export function fetchSafeRoute(body) {
   return request('/api/routes/safe', {
     method: 'POST',
     body: JSON.stringify(body),
-    timeoutMs: 4500
+    timeoutMs: 12000
   });
 }
 
