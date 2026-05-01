@@ -6,7 +6,7 @@
   "scripts": {
     "start": "powershell -ExecutionPolicy Bypass -File .\\start-android.ps1",
     "android": "powershell -ExecutionPolicy Bypass -File .\\start-android.ps1 -OpenAndroid",
-    "ios": "expo start --ios",
+    "ios": "powershell -ExecutionPolicy Bypass -File .\\start-ios.ps1",
     "web": "expo start --web"
   },
   "dependencies": {
