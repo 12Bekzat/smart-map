@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="420" viewBox="0 0 980 420" role="img" aria-label="Command Prompt ipconfig example">
+  <rect width="980" height="420" rx="8" fill="#101114"/>
+  <rect x="0" y="0" width="980" height="36" rx="8" fill="#26282d"/>
+  <circle cx="20" cy="18" r="6" fill="#ff5f57"/>
+  <circle cx="42" cy="18" r="6" fill="#febc2e"/>
+  <circle cx="64" cy="18" r="6" fill="#28c840"/>
+  <text x="88" y="23" font-family="Consolas, monospace" font-size="14" fill="#d8dee9">Command Prompt</text>
+  <text x="28" y="72" font-family="Consolas, monospace" font-size="18" fill="#e5e7eb">C:\Users\toleu&gt;ipconfig</text>
+  <text x="28" y="120" font-family="Consolas, monospace" font-size="18" fill="#e5e7eb">Wireless LAN adapter Wi-Fi:</text>
+  <text x="28" y="168" font-family="Consolas, monospace" font-size="18" fill="#cbd5e1">   Connection-specific DNS Suffix  . :</text>
+  <text x="28" y="202" font-family="Consolas, monospace" font-size="18" fill="#cbd5e1">   IPv4 Address. . . . . . . . . . : </text>
+  <rect x="486" y="181" width="150" height="30" rx="4" fill="#facc15"/>
+  <text x="494" y="202" font-family="Consolas, monospace" font-size="18" fill="#111827">192.168.1.25</text>
+  <text x="28" y="236" font-family="Consolas, monospace" font-size="18" fill="#cbd5e1">   Subnet Mask . . . . . . . . . . : 255.255.255.0</text>
+  <text x="28" y="270" font-family="Consolas, monospace" font-size="18" fill="#cbd5e1">   Default Gateway . . . . . . . . : 192.168.1.1</text>
+  <text x="28" y="338" font-family="Consolas, monospace" font-size="16" fill="#94a3b8">Copy the IPv4 Address and put it into mobile/.env</text>
+</svg>

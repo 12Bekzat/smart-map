@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="360" viewBox="0 0 980 360" role="img" aria-label="mobile .env IP edit example">
+  <rect width="980" height="360" rx="8" fill="#f8fafc"/>
+  <rect x="0" y="0" width="980" height="44" rx="8" fill="#1f2937"/>
+  <text x="24" y="28" font-family="Segoe UI, Arial, sans-serif" font-size="16" fill="#f9fafb">VS Code - mobile/.env</text>
+  <rect x="24" y="74" width="932" height="240" rx="6" fill="#111827"/>
+  <text x="48" y="122" font-family="Consolas, monospace" font-size="22" fill="#e5e7eb">EXPO_PUBLIC_API_URL=http://</text>
+  <rect x="390" y="97" width="170" height="34" rx="4" fill="#facc15"/>
+  <text x="400" y="122" font-family="Consolas, monospace" font-size="22" fill="#111827">192.168.1.25</text>
+  <text x="562" y="122" font-family="Consolas, monospace" font-size="22" fill="#e5e7eb">:4000</text>
+  <text x="48" y="188" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#cbd5e1">Change only the IP address. Keep http:// and :4000.</text>
+  <text x="48" y="232" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#cbd5e1">Restart Expo after saving this file.</text>
+</svg>

@@ -24,6 +24,7 @@ SafeWay is a mobile navigation prototype for Almaty, Kazakhstan. The app builds 
 - `backend/.env` - backend configuration
 - `db/migrations` - PostgreSQL schema
 - `db/seeds` - demo Almaty data
+- `documentation/PROJECT_CODE_EXPLANATION_RU.md` - beginner-friendly Russian explanation of frontend, backend, database, technologies, and data flow
 
 ## Backend Environment
 
@@ -117,6 +118,43 @@ For Android Emulator use:
 ```env
 EXPO_PUBLIC_API_URL=http://10.0.2.2:4000
 ```
+
+### macOS Emulator Or Simulator
+
+On Mac, keep the backend running first:
+
+```bash
+cd backend
+npm install
+npm run db:setup
+npm run dev
+```
+
+Then start Expo from the mobile folder:
+
+```bash
+cd mobile
+npm install
+npm run start:mac
+```
+
+Open a simulator/emulator directly:
+
+```bash
+npm run ios:mac
+npm run android:mac
+```
+
+For iOS Simulator, `http://localhost:4000` works, but the Mac script defaults to your LAN IP so it also works with physical phones on Wi-Fi. If needed, override it for one run:
+
+```bash
+EXPO_PUBLIC_API_URL=http://localhost:4000 npm run ios:mac
+EXPO_PUBLIC_API_URL=http://10.0.2.2:4000 npm run android:mac
+```
+
+Android Emulator maps the host machine as `10.0.2.2`, so use that override if LAN access is blocked.
+
+The macOS script sets `EXPO_PUBLIC_API_URL` before Expo starts, so a stale Windows IP in `mobile/.env` will not block the Mac run. Use the one-line override above when you want a specific URL.
 
 ## Auth And Guest Mode
 

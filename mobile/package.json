@@ -7,6 +7,9 @@
     "start": "powershell -ExecutionPolicy Bypass -File .\\start-android.ps1",
     "android": "powershell -ExecutionPolicy Bypass -File .\\start-android.ps1 -OpenAndroid",
     "ios": "powershell -ExecutionPolicy Bypass -File .\\start-ios.ps1",
+    "start:mac": "bash ./start-mac.sh",
+    "android:mac": "bash ./start-mac.sh android",
+    "ios:mac": "bash ./start-mac.sh ios",
     "web": "expo start --web"
   },
   "dependencies": {

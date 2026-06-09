@@ -33,6 +33,7 @@ import {
   sendReport
 } from './src/api';
 import { ALMATY_REGION, DEFAULT_END, DEFAULT_START } from './src/config';
+import { LANGUAGE_OPTIONS, translate } from './src/i18n';
 import { colors, shadows } from './src/theme';
 import { categoryLabel, formatDistance, formatDuration, routeCoordinates, toCoordinate } from './src/utils';
 
@@ -57,29 +58,30 @@ const defaultPreferences = {
 };
 
 const profiles = [
-  { key: 'scooter', label: 'Самокат', icon: 'flash' },
-  { key: 'walk', label: 'Пешком', icon: 'walk' },
-  { key: 'drive', label: 'Авто', icon: 'car-sport' },
-  { key: 'bike', label: 'Вело', icon: 'bicycle' }
+  { key: 'scooter', labelKey: 'profile.scooter', icon: 'flash' },
+  { key: 'walk', labelKey: 'profile.walk', icon: 'walk' },
+  { key: 'drive', labelKey: 'profile.drive', icon: 'car-sport' },
+  { key: 'bike', labelKey: 'profile.bike', icon: 'bicycle' }
 ];
 
 const avoidOptions = [
-  { key: 'poor_lighting', label: 'Темные улицы' },
-  { key: 'underpass', label: 'Подземные переходы' },
-  { key: 'traffic', label: 'Трафик' },
-  { key: 'crowd', label: 'Толпы' },
-  { key: 'construction', label: 'Ремонт' },
-  { key: 'slope', label: 'Склоны' }
+  { key: 'poor_lighting', labelKey: 'avoid.poor_lighting' },
+  { key: 'underpass', labelKey: 'avoid.underpass' },
+  { key: 'traffic', labelKey: 'avoid.traffic' },
+  { key: 'crowd', labelKey: 'avoid.crowd' },
+  { key: 'construction', labelKey: 'avoid.construction' },
+  { key: 'slope', labelKey: 'avoid.slope' }
 ];
 
 const priorities = [
-  { key: 'safest', label: 'Самый безопасный' },
-  { key: 'balanced', label: 'Баланс' },
-  { key: 'fastest', label: 'Быстрее' }
+  { key: 'safest', labelKey: 'priority.safest' },
+  { key: 'balanced', labelKey: 'priority.balanced' },
+  { key: 'fastest', labelKey: 'priority.fastest' }
 ];
 
 const defaultPhoneSettings = {
   model: 'Samsung S22 Ultra',
+  language: 'ru',
   navigationMode: 'buttons',
   bottomGuard: 44,
   compactRouteCard: false,
@@ -87,14 +89,14 @@ const defaultPhoneSettings = {
 };
 
 const navigationModes = [
-  { key: 'buttons', label: 'Кнопки' },
-  { key: 'gestures', label: 'Жесты' }
+  { key: 'buttons', labelKey: 'nav.buttons' },
+  { key: 'gestures', labelKey: 'nav.gestures' }
 ];
 
 const bottomGuardLevels = [
-  { key: 28, label: 'Мало' },
-  { key: 44, label: 'S22 Ultra' },
-  { key: 58, label: 'Больше' }
+  { key: 28, labelKey: 'bottom.small' },
+  { key: 44, labelKey: 'bottom.s22' },
+  { key: 58, labelKey: 'bottom.large' }
 ];
 
 const ALMATY_BOUNDS = {
@@ -105,12 +107,12 @@ const ALMATY_BOUNDS = {
 };
 
 const layerConfig = {
-  lit_street: { label: 'Освещение', color: '#F4B63E', icon: 'sunny' },
-  crowded_corridor: { label: 'Людные', color: '#7C3AED', icon: 'people' },
-  safe_zone: { label: 'Зоны', color: '#16A34A', icon: 'shield-checkmark' },
-  transport_hub: { label: 'Транспорт', color: '#0284C7', icon: 'train' },
-  police: { label: 'Полиция', color: '#1D4ED8', icon: 'shield' },
-  hospital: { label: 'Больницы', color: '#DC2626', icon: 'medical' }
+  lit_street: { labelKey: 'layer.lit_street', color: '#F4B63E', icon: 'sunny' },
+  crowded_corridor: { labelKey: 'layer.crowded_corridor', color: '#7C3AED', icon: 'people' },
+  safe_zone: { labelKey: 'layer.safe_zone', color: '#16A34A', icon: 'shield-checkmark' },
+  transport_hub: { labelKey: 'layer.transport_hub', color: '#0284C7', icon: 'train' },
+  police: { labelKey: 'layer.police', color: '#1D4ED8', icon: 'shield' },
+  hospital: { labelKey: 'layer.hospital', color: '#DC2626', icon: 'medical' }
 };
 
 function getBottomGuard(phoneSettings, insets) {
@@ -197,6 +199,8 @@ export default function App() {
     return { distanceKm, durationMin };
   }, [activeCoords, route]);
   const isSignedIn = Boolean(token && user);
+  const language = phoneSettings.language || defaultPhoneSettings.language;
+  const t = useMemo(() => (key, params) => translate(language, key, params), [language]);
 
   useEffect(() => {
     bootstrap();
@@ -283,7 +287,7 @@ export default function App() {
       const points = nextRoutePoints?.length >= 2 ? nextRoutePoints : [nextStart, nextEnd];
       const invalidPoint = points.find((point) => !isPointInsideAlmaty(point));
       if (invalidPoint) {
-        throw new Error('Точка маршрута вне зоны Алматы. Выбери место на карте Алматы или используй стартовую точку приложения.');
+        throw new Error(t('alert.routeOutOfAlmaty'));
       }
       const payload = await fetchSafeRoute({
         start: { lat: nextStart.lat, lng: nextStart.lng },
@@ -294,7 +298,7 @@ export default function App() {
         departureHour: nextPreferences.nightRoute ? 22 : new Date().getHours()
       });
       if (!payload.recommended) {
-        throw new Error('API не вернул подходящий маршрут для выбранных точек.');
+        throw new Error(t('alert.routeNoRecommended'));
       }
       if (requestId !== routeRequestRef.current) return;
       setRoute(payload.recommended);
@@ -305,7 +309,7 @@ export default function App() {
       fitRoute(payload.recommended);
     } catch (error) {
       if (requestId === routeRequestRef.current) {
-        Alert.alert('Не удалось построить маршрут', error.message);
+        Alert.alert(t('alert.routeBuildFailed'), error.message);
       }
     } finally {
       if (requestId === routeRequestRef.current) {
@@ -333,7 +337,7 @@ export default function App() {
       try {
         await saveRemotePreferences(nextPreferences, token);
       } catch (error) {
-        Alert.alert('Настройки', `Локально сохранено, но сервер не ответил: ${error.message}`);
+        Alert.alert(t('tab.settings'), t('alert.settingsSavedLocal', { message: error.message }));
       }
     }
 
@@ -351,18 +355,18 @@ export default function App() {
   async function useMyLocation() {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Геолокация', 'Разрешение не выдано. Оставил стартовую точку в центре Алматы.');
+      Alert.alert(t('alert.geoTitle'), t('alert.geoPermissionStart'));
       return;
     }
     const location = await Location.getCurrentPositionAsync({});
     const nextStart = {
-      title: 'Моя позиция',
+      title: t('common.myLocation'),
       lat: location.coords.latitude,
       lng: location.coords.longitude
     };
     const routeStart = isPointInsideAlmaty(nextStart) ? nextStart : DEFAULT_START;
     if (routeStart !== nextStart) {
-      Alert.alert('Геолокация вне Алматы', 'Телефон вернул координаты вне зоны сервиса. Использую стартовую точку в Алматы.');
+      Alert.alert(t('alert.geoOutsideTitle'), t('alert.geoOutsideStart'));
     }
     setStart(routeStart);
     const nextRoutePoints = [routeStart, ...routePoints.slice(1)];
@@ -374,19 +378,19 @@ export default function App() {
   async function buildRouteFromMyLocation(item) {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Геолокация', 'Разрешение не выдано. Не могу построить маршрут от текущей позиции.');
+      Alert.alert(t('alert.geoTitle'), t('alert.geoPermissionRoute'));
       return;
     }
 
     const location = await Location.getCurrentPositionAsync({});
     const currentPoint = {
-      title: 'Моя позиция',
+      title: t('common.myLocation'),
       lat: location.coords.latitude,
       lng: location.coords.longitude
     };
     const routeStart = isPointInsideAlmaty(currentPoint) ? currentPoint : start;
     if (routeStart !== currentPoint) {
-      Alert.alert('Геолокация вне Алматы', 'Телефон вернул координаты вне зоны сервиса. Построю маршрут от текущей стартовой точки на карте.');
+      Alert.alert(t('alert.geoOutsideTitle'), t('alert.geoOutsideRoute'));
     }
     const destination = toRoutePoint(item);
     const nextRoutePoints = [routeStart, destination];
@@ -408,7 +412,7 @@ export default function App() {
 
       const location = await Location.getCurrentPositionAsync({});
       const point = {
-        title: 'Моя позиция',
+        title: t('common.myLocation'),
         lat: location.coords.latitude,
         lng: location.coords.longitude
       };
@@ -457,7 +461,7 @@ export default function App() {
       }
     } catch (error) {
       if (requestId === searchRequestRef.current) {
-        Alert.alert('Поиск', error.message);
+        Alert.alert(t('alert.searchTitle'), error.message);
       }
     } finally {
       if (requestId === searchRequestRef.current) {
@@ -552,18 +556,18 @@ export default function App() {
 
   async function startNavigation() {
     if (!route) {
-      Alert.alert('Маршрут', 'Сначала построй маршрут.');
+      Alert.alert(t('alert.routeTitle'), t('alert.routeBuildFirst'));
       return;
     }
     const routeCoords = routeCoordinates(route);
     if (routeCoords.length < 2) {
-      Alert.alert('Маршрут', 'У маршрута нет линии для навигации.');
+      Alert.alert(t('alert.routeTitle'), t('alert.routeNoLine'));
       return;
     }
 
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Геолокация', 'Разрешение не выдано. Не могу вести по маршруту.');
+      Alert.alert(t('alert.geoTitle'), t('alert.geoPermissionNavigate'));
       return;
     }
 
@@ -597,7 +601,7 @@ export default function App() {
         if (remainingKm < 0.04) {
           stopNavigation();
           setRoutePanelHidden(false);
-          Alert.alert('Маршрут', 'Ты дошел до конца маршрута.');
+          Alert.alert(t('alert.routeTitle'), t('alert.routeFinished'));
           return;
         }
 
@@ -631,7 +635,7 @@ export default function App() {
 
   async function submitReport() {
     if (!reportText.trim()) {
-      Alert.alert('Репорт', 'Опиши риск коротко, чтобы его можно было проверить.');
+      Alert.alert(t('alert.reportTitle'), t('alert.reportDescribe'));
       return;
     }
 
@@ -648,11 +652,11 @@ export default function App() {
       }
       setReportText('');
       setReportOpen(false);
-      Alert.alert('Отправлено', isSignedIn
-        ? 'Репорт сохранен в базе и ожидает проверки.'
-        : 'Репорт отправлен как гостевой. Войди, чтобы привязывать историю к профилю.');
+      Alert.alert(t('alert.reportSent'), isSignedIn
+        ? t('alert.reportSavedUser')
+        : t('alert.reportSavedGuest'));
     } catch (error) {
-      Alert.alert('Репорт', error.message);
+      Alert.alert(t('alert.reportTitle'), error.message);
     }
   }
 
@@ -677,7 +681,7 @@ export default function App() {
         buildRoute({ nextPreferences: { ...defaultPreferences, ...(payload.preferences || {}) } });
       }
     } catch (error) {
-      Alert.alert(authMode === 'register' ? 'Регистрация' : 'Вход', error.message);
+      Alert.alert(authMode === 'register' ? t('alert.authRegister') : t('alert.authLogin'), error.message);
     } finally {
       setAuthLoading(false);
     }
@@ -714,6 +718,8 @@ export default function App() {
             loading={loading || booting}
             preferences={preferences}
             phoneSettings={phoneSettings}
+            language={language}
+            t={t}
             openSearch={() => setSearchOpen(true)}
             openReport={openReport}
             openReportAtCurrentLocation={openReportAtCurrentLocation}
@@ -740,6 +746,8 @@ export default function App() {
             openAuth={setAuthMode}
             logout={logout}
             phoneSettings={phoneSettings}
+            language={language}
+            t={t}
           />
         )}
 
@@ -749,6 +757,9 @@ export default function App() {
             updatePreferences={updatePreferences}
             rebuild={() => routePlannerOpen ? buildRoute({ nextPreferences: preferences }) : setSearchOpen(true)}
             phoneSettings={phoneSettings}
+            language={language}
+            t={t}
+            updatePhoneSettings={updatePhoneSettings}
             openPhoneSettings={() => setScreen('phone')}
           />
         )}
@@ -757,10 +768,11 @@ export default function App() {
           <PhoneSettingsScreen
             phoneSettings={phoneSettings}
             updatePhoneSettings={updatePhoneSettings}
+            t={t}
           />
         )}
 
-        <BottomTabs screen={screen} setScreen={setScreen} phoneSettings={phoneSettings} />
+        <BottomTabs screen={screen} setScreen={setScreen} phoneSettings={phoneSettings} t={t} />
 
         <ReportModal
           visible={reportOpen}
@@ -770,6 +782,7 @@ export default function App() {
           onSubmit={submitReport}
           isSignedIn={isSignedIn}
           phoneSettings={phoneSettings}
+          t={t}
           point={reportPoint}
           category={reportCategory}
           setCategory={setReportCategory}
@@ -786,6 +799,7 @@ export default function App() {
           onSubmit={submitAuth}
           switchMode={() => setAuthMode(authMode === 'register' ? 'login' : 'register')}
           phoneSettings={phoneSettings}
+          t={t}
         />
 
         <SearchModal
@@ -807,6 +821,7 @@ export default function App() {
             openReport(item);
           }}
           phoneSettings={phoneSettings}
+          t={t}
         />
       </SafeAreaView>
     </SafeAreaProvider>
@@ -833,6 +848,8 @@ function MapScreen({
   loading,
   preferences,
   phoneSettings,
+  language,
+  t,
   openSearch,
   openReport,
   openReportAtCurrentLocation,
@@ -873,7 +890,7 @@ function MapScreen({
         onLongPress={(event) => {
           const coordinate = event.nativeEvent.coordinate;
           openReport({
-            title: 'Выбранная точка',
+            title: t('common.selectedPoint'),
             lat: coordinate.latitude,
             lng: coordinate.longitude
           });
@@ -929,7 +946,7 @@ function MapScreen({
                 key={feature.id}
                 coordinate={coordinates[0]}
                 title={feature.title}
-                description={config.label}
+                description={t(config.labelKey)}
                 pinColor={config.color}
               />
             ) : null;
@@ -940,7 +957,7 @@ function MapScreen({
             key={risk.id}
             coordinate={{ latitude: Number(risk.lat), longitude: Number(risk.lng) }}
             title={risk.title}
-            description={categoryLabel(risk.category)}
+            description={categoryLabel(risk.category, language)}
             pinColor={risk.severity >= 4 ? colors.danger : colors.warning}
           />
         ))}
@@ -949,8 +966,8 @@ function MapScreen({
           <Marker
             key={report.id}
             coordinate={{ latitude: Number(report.lat), longitude: Number(report.lng) }}
-            title={categoryLabel(report.category)}
-            description={report.description || 'Сообщение пользователя'}
+            title={categoryLabel(report.category, language)}
+            description={report.description || t('map.userReport')}
             pinColor={report.severity >= 4 ? colors.danger : colors.warning}
           />
         ))}
@@ -980,13 +997,13 @@ function MapScreen({
         <Pressable style={styles.searchButton} onPress={openSearch}>
           <Ionicons name="search" size={20} color={colors.muted} />
           <View style={styles.searchCopy}>
-            <Text style={styles.searchLabel}>Куда едем?</Text>
-            <Text style={styles.searchHint} numberOfLines={1}>Найти улицу, место или безопасную зону</Text>
+            <Text style={styles.searchLabel}>{t('map.searchLabel')}</Text>
+            <Text style={styles.searchHint} numberOfLines={1}>{t('map.searchHint')}</Text>
           </View>
         </Pressable>
         <View>
           <Text style={styles.appName}>SafeWay</Text>
-          <Text style={styles.city}>Алматы</Text>
+          <Text style={styles.city}>{t('common.city')}</Text>
         </View>
         <View style={styles.topActions}>
           <IconButton icon="locate" onPress={useMyLocation} />
@@ -997,7 +1014,7 @@ function MapScreen({
       <View style={styles.mapFabColumn}>
         <Pressable style={styles.mapFabButton} onPress={openReportAtCurrentLocation}>
           <Ionicons name="add-circle" size={24} color={colors.surface} />
-          <Text style={styles.mapFabText}>Событие</Text>
+          <Text style={styles.mapFabText}>{t('map.event')}</Text>
         </Pressable>
       </View>
 
@@ -1006,9 +1023,9 @@ function MapScreen({
           <Pressable style={styles.routeMiniMain} onPress={showRoutePanelWindow}>
             <Ionicons name={navigationActive ? 'navigate' : 'map'} size={20} color={colors.primary} />
             <View style={styles.routeMiniCopy}>
-              <Text style={styles.routeMiniTitle}>{navigationActive ? 'Маршрут идет' : 'Маршрут скрыт'}</Text>
+              <Text style={styles.routeMiniTitle}>{navigationActive ? t('map.routeActive') : t('map.routeHidden')}</Text>
               <Text style={styles.routeMiniMeta}>
-                {formatDistance(displayDistanceKm)} · {formatDuration(displayDurationMin)}
+                {formatDistance(displayDistanceKm, language)} · {formatDuration(displayDurationMin, language)}
               </Text>
             </View>
           </Pressable>
@@ -1030,20 +1047,20 @@ function MapScreen({
             {Object.entries(layerConfig).map(([key, config]) => (
               <Pressable key={key} style={[styles.layerChip, visibleLayers[key] && { backgroundColor: config.color, borderColor: config.color }]} onPress={() => toggleLayer(key)}>
                 <Ionicons name={config.icon} size={15} color={visibleLayers[key] ? colors.surface : colors.muted} />
-                <Text style={[styles.layerChipText, visibleLayers[key] && styles.layerChipTextActive]}>{config.label}</Text>
+                <Text style={[styles.layerChipText, visibleLayers[key] && styles.layerChipTextActive]}>{t(config.labelKey)}</Text>
               </Pressable>
             ))}
             <Pressable style={[styles.layerChip, visibleLayers.places && styles.layerChipActive]} onPress={() => toggleLayer('places')}>
               <Ionicons name="business" size={15} color={visibleLayers.places ? colors.surface : colors.muted} />
-              <Text style={[styles.layerChipText, visibleLayers.places && styles.layerChipTextActive]}>Места</Text>
+              <Text style={[styles.layerChipText, visibleLayers.places && styles.layerChipTextActive]}>{t('layer.places')}</Text>
             </Pressable>
             <Pressable style={[styles.layerChip, visibleLayers.risks && styles.layerChipDanger]} onPress={() => toggleLayer('risks')}>
               <Ionicons name="warning" size={15} color={visibleLayers.risks ? colors.surface : colors.muted} />
-              <Text style={[styles.layerChipText, visibleLayers.risks && styles.layerChipTextActive]}>Риски</Text>
+              <Text style={[styles.layerChipText, visibleLayers.risks && styles.layerChipTextActive]}>{t('layer.risks')}</Text>
             </Pressable>
             <Pressable style={[styles.layerChip, visibleLayers.reports && styles.layerChipDanger]} onPress={() => toggleLayer('reports')}>
               <Ionicons name="alert-circle" size={15} color={visibleLayers.reports ? colors.surface : colors.muted} />
-              <Text style={[styles.layerChipText, visibleLayers.reports && styles.layerChipTextActive]}>События</Text>
+              <Text style={[styles.layerChipText, visibleLayers.reports && styles.layerChipTextActive]}>{t('layer.reports')}</Text>
             </Pressable>
           </ScrollView>
         </View>
@@ -1054,20 +1071,20 @@ function MapScreen({
           {Object.entries(layerConfig).map(([key, config]) => (
             <Pressable key={key} style={[styles.layerChip, visibleLayers[key] && { backgroundColor: config.color, borderColor: config.color }]} onPress={() => toggleLayer(key)}>
               <Ionicons name={config.icon} size={15} color={visibleLayers[key] ? colors.surface : colors.muted} />
-              <Text style={[styles.layerChipText, visibleLayers[key] && styles.layerChipTextActive]}>{config.label}</Text>
+              <Text style={[styles.layerChipText, visibleLayers[key] && styles.layerChipTextActive]}>{t(config.labelKey)}</Text>
             </Pressable>
           ))}
           <Pressable style={[styles.layerChip, visibleLayers.places && styles.layerChipActive]} onPress={() => toggleLayer('places')}>
             <Ionicons name="business" size={15} color={visibleLayers.places ? colors.surface : colors.muted} />
-            <Text style={[styles.layerChipText, visibleLayers.places && styles.layerChipTextActive]}>Места</Text>
+            <Text style={[styles.layerChipText, visibleLayers.places && styles.layerChipTextActive]}>{t('layer.places')}</Text>
           </Pressable>
           <Pressable style={[styles.layerChip, visibleLayers.risks && styles.layerChipDanger]} onPress={() => toggleLayer('risks')}>
             <Ionicons name="warning" size={15} color={visibleLayers.risks ? colors.surface : colors.muted} />
-            <Text style={[styles.layerChipText, visibleLayers.risks && styles.layerChipTextActive]}>Риски</Text>
+            <Text style={[styles.layerChipText, visibleLayers.risks && styles.layerChipTextActive]}>{t('layer.risks')}</Text>
           </Pressable>
           <Pressable style={[styles.layerChip, visibleLayers.reports && styles.layerChipDanger]} onPress={() => toggleLayer('reports')}>
             <Ionicons name="alert-circle" size={15} color={visibleLayers.reports ? colors.surface : colors.muted} />
-            <Text style={[styles.layerChipText, visibleLayers.reports && styles.layerChipTextActive]}>События</Text>
+            <Text style={[styles.layerChipText, visibleLayers.reports && styles.layerChipTextActive]}>{t('layer.reports')}</Text>
           </Pressable>
         </ScrollView>
 
@@ -1078,14 +1095,14 @@ function MapScreen({
             ) : (
               <Text style={styles.scoreText}>{route?.safetyScore || '--'}</Text>
             )}
-            <Text style={styles.scoreLabel}>индекс</Text>
+            <Text style={styles.scoreLabel}>{t('map.index')}</Text>
           </View>
           <View style={styles.routeTitleBlock}>
             <Text style={styles.routeTitle}>
-              {navigationActive ? 'Навигация' : route?.summary?.safetyLabel || 'Безопасный маршрут'}
+              {navigationActive ? t('map.navigation') : (language === 'ru' && route?.summary?.safetyLabel) || t('map.safeRoute')}
             </Text>
             <Text style={styles.routeSubtitle}>
-              {formatDistance(displayDistanceKm)} · {formatDuration(displayDurationMin)}
+              {formatDistance(displayDistanceKm, language)} · {formatDuration(displayDurationMin, language)}
             </Text>
           </View>
           <Pressable style={styles.closeRouteButton} onPress={closeRoutePlanner}>
@@ -1100,12 +1117,12 @@ function MapScreen({
           >
             <Ionicons name={navigationActive ? 'stop' : 'play'} size={18} color={colors.surface} />
             <Text style={styles.routePrimaryActionText}>
-              {navigationActive ? 'Остановить' : 'Начать маршрут'}
+              {navigationActive ? t('map.stopRoute') : t('map.startRoute')}
             </Text>
           </Pressable>
           <Pressable style={styles.routeSecondaryAction} onPress={hideRoutePanel}>
             <Ionicons name="chevron-down" size={18} color={colors.ink} />
-            <Text style={styles.routeSecondaryActionText}>Скрыть окно</Text>
+            <Text style={styles.routeSecondaryActionText}>{t('map.hidePanel')}</Text>
           </Pressable>
         </View>
 
@@ -1122,12 +1139,12 @@ function MapScreen({
           {!navigationActive && (
             <Pressable style={styles.addWaypointButton} onPress={swapRoute}>
               <Ionicons name="swap-vertical" size={18} color={colors.primary} />
-              <Text style={styles.addWaypointText}>Поменять старт и финиш</Text>
+              <Text style={styles.addWaypointText}>{t('map.swapRoute')}</Text>
             </Pressable>
           )}
           <Pressable style={styles.addWaypointButton} onPress={openSearch}>
             <Ionicons name="add" size={18} color={colors.primary} />
-            <Text style={styles.addWaypointText}>Добавить точку</Text>
+            <Text style={styles.addWaypointText}>{t('map.addWaypoint')}</Text>
           </Pressable>
         </View>
 
@@ -1139,7 +1156,7 @@ function MapScreen({
               onPress={() => updatePreferences({ profile: item.key })}
             >
               <Ionicons name={item.icon} size={18} color={preferences.profile === item.key ? colors.surface : colors.muted} />
-              <Text style={[styles.segmentText, preferences.profile === item.key && styles.segmentTextActive]}>{item.label}</Text>
+              <Text style={[styles.segmentText, preferences.profile === item.key && styles.segmentTextActive]}>{t(item.labelKey)}</Text>
             </Pressable>
           ))}
         </View>
@@ -1150,7 +1167,7 @@ function MapScreen({
             onPress={() => updatePreferences({ nightRoute: !preferences.nightRoute })}
           >
             <Ionicons name="moon" size={16} color={preferences.nightRoute ? colors.surface : colors.muted} />
-            <Text style={[styles.chipText, preferences.nightRoute && styles.chipTextActive]}>Ночь</Text>
+            <Text style={[styles.chipText, preferences.nightRoute && styles.chipTextActive]}>{t('map.night')}</Text>
           </Pressable>
           {avoidOptions.slice(0, 4).map((item) => {
             const active = preferences.avoid.includes(item.key);
@@ -1165,7 +1182,7 @@ function MapScreen({
                   updatePreferences({ avoid });
                 }}
               >
-                <Text style={[styles.chipText, active && styles.chipTextActive]}>{item.label}</Text>
+                <Text style={[styles.chipText, active && styles.chipTextActive]}>{t(item.labelKey)}</Text>
               </Pressable>
             );
           })}
@@ -1184,7 +1201,7 @@ function MapScreen({
                   >
                     <Text style={[styles.routeOptionValue, active && styles.routeOptionTextActive]}>{item.safetyScore}</Text>
                     <Text style={[styles.routeOptionLabel, active && styles.routeOptionTextActive]}>
-                      {index === 0 ? 'Лучший' : `Вариант ${index + 1}`}
+                      {index === 0 ? t('map.best') : t('map.variant', { number: index + 1 })}
                     </Text>
                   </Pressable>
                 );
@@ -1196,7 +1213,7 @@ function MapScreen({
             <View key={feature.id} style={[styles.insightItem, styles.safeInsightItem]}>
               <MaterialCommunityIcons name="shield-check-outline" size={18} color={colors.primary} />
               <Text style={styles.insightText} numberOfLines={2}>
-                {layerConfig[feature.category]?.label || 'Безопасно'}: {feature.title}
+                {layerConfig[feature.category]?.labelKey ? t(layerConfig[feature.category].labelKey) : t('map.safe')}: {feature.title}
               </Text>
             </View>
           ))}
@@ -1204,14 +1221,14 @@ function MapScreen({
             <View key={risk.id} style={styles.insightItem}>
               <MaterialCommunityIcons name="shield-alert-outline" size={18} color={colors.warning} />
               <Text style={styles.insightText} numberOfLines={2}>
-                {categoryLabel(risk.category)}: {risk.title}
+                {categoryLabel(risk.category, language)}: {risk.title}
               </Text>
             </View>
           ))}
           {!route?.riskHits?.length && (
             <View style={styles.insightItem}>
               <MaterialCommunityIcons name="shield-check-outline" size={18} color={colors.primary} />
-              <Text style={styles.insightText}>На маршруте нет близких активных рисков.</Text>
+              <Text style={styles.insightText}>{t('map.noRisks')}</Text>
             </View>
           )}
         </View>}
@@ -1220,62 +1237,77 @@ function MapScreen({
   );
 }
 
-function ProfileScreen({ user, isSignedIn, route, reportCount, openAuth, logout, phoneSettings }) {
+function ProfileScreen({ user, isSignedIn, route, reportCount, openAuth, logout, phoneSettings, language, t }) {
   const layout = usePhoneLayout(phoneSettings);
 
   return (
     <ScrollView style={styles.page} contentContainerStyle={[styles.pageContent, { paddingBottom: layout.pageBottomPadding }]}>
-      <Text style={styles.pageTitle}>Профиль</Text>
+      <Text style={styles.pageTitle}>{t('profile.title')}</Text>
       <View style={styles.profileHero}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>{isSignedIn ? user.name.slice(0, 1).toUpperCase() : 'G'}</Text>
         </View>
         <View style={styles.profileCopy}>
-          <Text style={styles.profileName}>{isSignedIn ? user.name : 'Гость'}</Text>
-          <Text style={styles.profileMeta}>{isSignedIn ? user.email : 'Данные и настройки хранятся на этом телефоне'}</Text>
+          <Text style={styles.profileName}>{isSignedIn ? user.name : t('common.guest')}</Text>
+          <Text style={styles.profileMeta}>{isSignedIn ? user.email : t('profile.guestMeta')}</Text>
         </View>
       </View>
 
       <View style={styles.metricsGrid}>
-        <Metric label="Индекс" value={route?.safetyScore || '--'} />
-        <Metric label="Время" value={formatDuration(route?.summary?.durationMin)} />
-        <Metric label="Риски" value={String(route?.summary?.riskCount ?? 0)} />
-        <Metric label="Зоны" value={String(reportCount)} />
+        <Metric label={t('metric.index')} value={route?.safetyScore || '--'} />
+        <Metric label={t('metric.time')} value={formatDuration(route?.summary?.durationMin, language)} />
+        <Metric label={t('metric.risks')} value={String(route?.summary?.riskCount ?? 0)} />
+        <Metric label={t('metric.zones')} value={String(reportCount)} />
       </View>
 
       {isSignedIn ? (
         <Pressable style={styles.dangerButton} onPress={logout}>
-          <Text style={styles.dangerButtonText}>Выйти</Text>
+          <Text style={styles.dangerButtonText}>{t('profile.logout')}</Text>
         </Pressable>
       ) : (
         <View style={styles.authActions}>
           <Pressable style={styles.primaryButton} onPress={() => openAuth('login')}>
-            <Text style={styles.primaryButtonText}>Войти</Text>
+            <Text style={styles.primaryButtonText}>{t('auth.login')}</Text>
           </Pressable>
           <Pressable style={styles.secondaryButton} onPress={() => openAuth('register')}>
-            <Text style={styles.secondaryButtonText}>Регистрация</Text>
+            <Text style={styles.secondaryButtonText}>{t('auth.register')}</Text>
           </Pressable>
         </View>
       )}
 
       <View style={styles.infoBlock}>
-        <Text style={styles.infoTitle}>Как работает режим гостя</Text>
-        <Text style={styles.infoText}>
-          Без аккаунта SafeWay сохраняет настройки маршрута локально на устройстве. После входа или регистрации эти настройки синхронизируются с PostgreSQL и будут доступны на другом устройстве.
-        </Text>
+        <Text style={styles.infoTitle}>{t('profile.guestTitle')}</Text>
+        <Text style={styles.infoText}>{t('profile.guestInfo')}</Text>
       </View>
     </ScrollView>
   );
 }
 
-function SettingsScreen({ preferences, updatePreferences, rebuild, phoneSettings, openPhoneSettings }) {
+function SettingsScreen({ preferences, updatePreferences, rebuild, phoneSettings, language, t, updatePhoneSettings, openPhoneSettings }) {
   const layout = usePhoneLayout(phoneSettings);
 
   return (
     <ScrollView style={styles.page} contentContainerStyle={[styles.pageContent, { paddingBottom: layout.pageBottomPadding }]}>
-      <Text style={styles.pageTitle}>Настройки маршрута</Text>
+      <Text style={styles.pageTitle}>{t('settings.routeTitle')}</Text>
 
-      <Section title="Приоритет">
+      <Section title={t('settings.language')}>
+        <View style={styles.optionRow}>
+          {LANGUAGE_OPTIONS.map((item) => (
+            <Pressable
+              key={item.key}
+              style={[styles.optionPill, language === item.key && styles.optionPillActive]}
+              onPress={() => updatePhoneSettings({ language: item.key })}
+            >
+              <Text style={[styles.optionPillText, language === item.key && styles.optionPillTextActive]}>
+                {item.label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+        <Text style={styles.settingHint}>{t('settings.languageHint')}</Text>
+      </Section>
+
+      <Section title={t('settings.priority')}>
         <View style={styles.optionRow}>
           {priorities.map((item) => (
             <Pressable
@@ -1284,14 +1316,14 @@ function SettingsScreen({ preferences, updatePreferences, rebuild, phoneSettings
               onPress={() => updatePreferences({ routePriority: item.key })}
             >
               <Text style={[styles.optionPillText, preferences.routePriority === item.key && styles.optionPillTextActive]}>
-                {item.label}
+                {t(item.labelKey)}
               </Text>
             </Pressable>
           ))}
         </View>
       </Section>
 
-      <Section title="Тип движения">
+      <Section title={t('settings.transport')}>
         <View style={styles.optionRow}>
           {profiles.map((item) => (
             <Pressable
@@ -1301,14 +1333,14 @@ function SettingsScreen({ preferences, updatePreferences, rebuild, phoneSettings
             >
               <Ionicons name={item.icon} size={16} color={preferences.profile === item.key ? colors.surface : colors.muted} />
               <Text style={[styles.optionPillText, preferences.profile === item.key && styles.optionPillTextActive]}>
-                {item.label}
+                {t(item.labelKey)}
               </Text>
             </Pressable>
           ))}
         </View>
       </Section>
 
-      <Section title="Избегать">
+      <Section title={t('settings.avoid')}>
         <View style={styles.wrapGrid}>
           {avoidOptions.map((item) => {
             const active = preferences.avoid.includes(item.key);
@@ -1324,34 +1356,34 @@ function SettingsScreen({ preferences, updatePreferences, rebuild, phoneSettings
                 }}
               >
                 <Ionicons name={active ? 'checkmark-circle' : 'ellipse-outline'} size={17} color={active ? colors.surface : colors.muted} />
-                <Text style={[styles.checkChipText, active && styles.checkChipTextActive]}>{item.label}</Text>
+                <Text style={[styles.checkChipText, active && styles.checkChipTextActive]}>{t(item.labelKey)}</Text>
               </Pressable>
             );
           })}
         </View>
       </Section>
 
-      <Section title="Безопасность">
+      <Section title={t('settings.safety')}>
         <ToggleRow
-          label="Ночной маршрут"
-          hint="Усиливает штраф за плохо освещенные зоны."
+          label={t('settings.nightLabel')}
+          hint={t('settings.nightHint')}
           value={preferences.nightRoute}
           onValueChange={(value) => updatePreferences({ nightRoute: value })}
         />
         <ToggleRow
-          label="Предпочитать освещенные улицы"
-          hint="Автоматически избегает зон плохого освещения."
+          label={t('settings.litLabel')}
+          hint={t('settings.litHint')}
           value={preferences.preferLitStreets}
           onValueChange={(value) => updatePreferences({ preferLitStreets: value })}
         />
         <ToggleRow
-          label="Предпочитать людные места"
-          hint="Приоритизирует маршруты рядом с безопасными публичными точками."
+          label={t('settings.publicLabel')}
+          hint={t('settings.publicHint')}
           value={preferences.preferPublicPlaces}
           onValueChange={(value) => updatePreferences({ preferPublicPlaces: value }, { rebuild: false })}
         />
         <View style={styles.riskLevel}>
-          <Text style={styles.settingLabel}>Максимальный уровень риска: {preferences.maxRiskLevel}</Text>
+          <Text style={styles.settingLabel}>{t('settings.maxRisk', { level: preferences.maxRiskLevel })}</Text>
           <View style={styles.levelRow}>
             {[1, 2, 3, 4, 5].map((level) => (
               <Pressable
@@ -1366,30 +1398,30 @@ function SettingsScreen({ preferences, updatePreferences, rebuild, phoneSettings
         </View>
       </Section>
 
-      <Section title="Устройство">
+      <Section title={t('settings.device')}>
         <Pressable style={styles.deviceSettingsButton} onPress={openPhoneSettings}>
           <Ionicons name="phone-portrait" size={18} color={colors.primary} />
           <View style={styles.profileCopy}>
-            <Text style={styles.settingLabel}>Настройки телефона</Text>
-            <Text style={styles.settingHint}>Нижняя граница, кнопки Android и компактность карты.</Text>
+            <Text style={styles.settingLabel}>{t('settings.phoneTitle')}</Text>
+            <Text style={styles.settingHint}>{t('settings.phoneHint')}</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color={colors.muted} />
         </Pressable>
       </Section>
 
       <Pressable style={styles.primaryButtonWide} onPress={rebuild}>
-        <Text style={styles.primaryButtonText}>Перестроить маршрут</Text>
+        <Text style={styles.primaryButtonText}>{t('settings.rebuild')}</Text>
       </Pressable>
     </ScrollView>
   );
 }
 
-function PhoneSettingsScreen({ phoneSettings, updatePhoneSettings }) {
+function PhoneSettingsScreen({ phoneSettings, updatePhoneSettings, t }) {
   const layout = usePhoneLayout(phoneSettings);
 
   return (
     <ScrollView style={styles.page} contentContainerStyle={[styles.pageContent, { paddingBottom: layout.pageBottomPadding }]}>
-      <Text style={styles.pageTitle}>Телефон</Text>
+      <Text style={styles.pageTitle}>{t('phone.title')}</Text>
 
       <View style={styles.phoneHero}>
         <View style={styles.phoneIcon}>
@@ -1397,13 +1429,11 @@ function PhoneSettingsScreen({ phoneSettings, updatePhoneSettings }) {
         </View>
         <View style={styles.profileCopy}>
           <Text style={styles.profileName}>{phoneSettings.model}</Text>
-          <Text style={styles.profileMeta}>
-            Нижний отступ сейчас {layout.bottomGuard} px. Он защищает интерфейс от кнопок Домой, Назад и Обзор.
-          </Text>
+          <Text style={styles.profileMeta}>{t('phone.bottomGuard', { px: layout.bottomGuard })}</Text>
         </View>
       </View>
 
-      <Section title="Системная навигация">
+      <Section title={t('phone.navSection')}>
         <View style={styles.optionRow}>
           {navigationModes.map((item) => (
             <Pressable
@@ -1417,14 +1447,14 @@ function PhoneSettingsScreen({ phoneSettings, updatePhoneSettings }) {
                 color={phoneSettings.navigationMode === item.key ? colors.surface : colors.muted}
               />
               <Text style={[styles.optionPillText, phoneSettings.navigationMode === item.key && styles.optionPillTextActive]}>
-                {item.label}
+                {t(item.labelKey)}
               </Text>
             </Pressable>
           ))}
         </View>
       </Section>
 
-      <Section title="Нижняя граница">
+      <Section title={t('phone.bottomSection')}>
         <View style={styles.optionRow}>
           {bottomGuardLevels.map((item) => (
             <Pressable
@@ -1433,26 +1463,24 @@ function PhoneSettingsScreen({ phoneSettings, updatePhoneSettings }) {
               onPress={() => updatePhoneSettings({ bottomGuard: item.key, navigationMode: 'buttons' })}
             >
               <Text style={[styles.optionPillText, phoneSettings.bottomGuard === item.key && styles.optionPillTextActive]}>
-                {item.label}
+                {t(item.labelKey)}
               </Text>
             </Pressable>
           ))}
         </View>
-        <Text style={styles.settingHint}>
-          Для Samsung S22 Ultra с кнопками лучше оставить профиль S22 Ultra или Больше.
-        </Text>
+        <Text style={styles.settingHint}>{t('phone.bottomHint')}</Text>
       </Section>
 
-      <Section title="Экран карты">
+      <Section title={t('phone.mapSection')}>
         <ToggleRow
-          label="Компактная карточка маршрута"
-          hint="Скрывает быстрые фильтры и подсказки, чтобы карта занимала больше места."
+          label={t('phone.compactLabel')}
+          hint={t('phone.compactHint')}
           value={phoneSettings.compactRouteCard}
           onValueChange={(value) => updatePhoneSettings({ compactRouteCard: value })}
         />
         <ToggleRow
-          label="Крупные зоны нажатия"
-          hint="Оставляет кнопки и нижнюю навигацию удобными для большого экрана."
+          label={t('phone.touchLabel')}
+          hint={t('phone.touchHint')}
           value={phoneSettings.largeTouchTargets}
           onValueChange={(value) => updatePhoneSettings({ largeTouchTargets: value })}
         />
@@ -1561,7 +1589,8 @@ function SearchModal({
   onRouteFromMe,
   onSaveFavorite,
   onReportPoint,
-  phoneSettings
+  phoneSettings,
+  t
 }) {
   const layout = usePhoneLayout(phoneSettings);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -1582,7 +1611,7 @@ function SearchModal({
                   if (value.trim().length >= 2) onSearch(value);
                 }}
                 onSubmitEditing={() => onSearch(query)}
-                placeholder="Улица, метро, парк, безопасная зона"
+                placeholder={t('search.placeholder')}
                 placeholderTextColor={colors.muted}
                 autoFocus
                 style={styles.searchInput}
@@ -1606,16 +1635,16 @@ function SearchModal({
               </View>
               <View style={styles.resultActions}>
                 <Pressable style={[styles.smallActionButton, styles.primarySmallAction]} onPress={() => onRouteFromMe(selectedItem)}>
-                  <Text style={styles.primarySmallActionText}>Сюда от меня</Text>
+                  <Text style={styles.primarySmallActionText}>{t('search.toMe')}</Text>
                 </Pressable>
                 <Pressable style={styles.smallActionButton} onPress={() => onSetStart(selectedItem)}>
-                  <Text style={styles.smallActionText}>Отсюда</Text>
+                  <Text style={styles.smallActionText}>{t('search.fromHere')}</Text>
                 </Pressable>
                 <Pressable style={styles.smallActionButton} onPress={() => onSetEnd(selectedItem)}>
-                  <Text style={styles.smallActionText}>Сюда</Text>
+                  <Text style={styles.smallActionText}>{t('search.toHere')}</Text>
                 </Pressable>
                 <Pressable style={styles.smallActionButton} onPress={() => onAddWaypoint(selectedItem)}>
-                  <Text style={styles.smallActionText}>Через</Text>
+                  <Text style={styles.smallActionText}>{t('search.via')}</Text>
                 </Pressable>
                 <Pressable style={styles.smallIconAction} onPress={() => onSaveFavorite(selectedItem)}>
                   <Ionicons name="star" size={17} color={colors.warning} />
@@ -1628,7 +1657,7 @@ function SearchModal({
           )}
 
           <View style={styles.searchResultHeader}>
-            <Text style={styles.sectionTitle}>{query.trim().length >= 2 ? 'Результаты' : 'Избранные места'}</Text>
+            <Text style={styles.sectionTitle}>{query.trim().length >= 2 ? t('search.results') : t('search.favorites')}</Text>
             {loading && <ActivityIndicator color={colors.primary} />}
           </View>
 
@@ -1646,13 +1675,13 @@ function SearchModal({
                 </Pressable>
                 <View style={styles.resultActions}>
                   <Pressable style={styles.smallActionButton} onPress={() => onSetStart(item)}>
-                    <Text style={styles.smallActionText}>Старт</Text>
+                    <Text style={styles.smallActionText}>{t('search.start')}</Text>
                   </Pressable>
                   <Pressable style={styles.smallActionButton} onPress={() => onRouteFromMe(item)}>
-                    <Text style={styles.smallActionText}>Маршрут</Text>
+                    <Text style={styles.smallActionText}>{t('search.route')}</Text>
                   </Pressable>
                   <Pressable style={styles.smallActionButton} onPress={() => onAddWaypoint(item)}>
-                    <Text style={styles.smallActionText}>Точка</Text>
+                    <Text style={styles.smallActionText}>{t('search.waypoint')}</Text>
                   </Pressable>
                   <Pressable style={styles.smallIconAction} onPress={() => onSaveFavorite(item)}>
                     <Ionicons name="star" size={17} color={colors.warning} />
@@ -1665,7 +1694,7 @@ function SearchModal({
             ))}
             {!items.length && !loading && (
               <Text style={styles.emptySearchText}>
-                {query.trim().length >= 2 ? 'Ничего не найдено.' : 'Сохраняй места звездочкой, чтобы быстро строить маршруты.'}
+                {query.trim().length >= 2 ? t('search.emptyResults') : t('search.emptyFavorites')}
               </Text>
             )}
           </ScrollView>
@@ -1681,7 +1710,7 @@ function getResultIcon(item) {
   return 'location';
 }
 
-function AuthModal({ mode, form, setForm, loading, onClose, onSubmit, switchMode, phoneSettings }) {
+function AuthModal({ mode, form, setForm, loading, onClose, onSubmit, switchMode, phoneSettings, t }) {
   const visible = Boolean(mode);
   const isRegister = mode === 'register';
   const layout = usePhoneLayout(phoneSettings);
@@ -1690,15 +1719,13 @@ function AuthModal({ mode, form, setForm, loading, onClose, onSubmit, switchMode
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.modalBackdrop}>
         <View style={[styles.sheet, { paddingBottom: layout.sheetBottomPadding }]}>
-          <Text style={styles.reportTitle}>{isRegister ? 'Регистрация' : 'Вход'}</Text>
-          <Text style={styles.reportHint}>
-            Аккаунт не обязателен. Он нужен только для сохранения настроек и репортов в базе.
-          </Text>
+          <Text style={styles.reportTitle}>{isRegister ? t('auth.register') : t('auth.login')}</Text>
+          <Text style={styles.reportHint}>{t('auth.description')}</Text>
           {isRegister && (
             <TextInput
               value={form.name}
               onChangeText={(name) => setForm({ ...form, name })}
-              placeholder="Имя"
+              placeholder={t('auth.name')}
               placeholderTextColor={colors.muted}
               style={styles.input}
             />
@@ -1706,7 +1733,7 @@ function AuthModal({ mode, form, setForm, loading, onClose, onSubmit, switchMode
           <TextInput
             value={form.email}
             onChangeText={(email) => setForm({ ...form, email })}
-            placeholder="Email"
+            placeholder={t('auth.email')}
             autoCapitalize="none"
             keyboardType="email-address"
             placeholderTextColor={colors.muted}
@@ -1715,21 +1742,21 @@ function AuthModal({ mode, form, setForm, loading, onClose, onSubmit, switchMode
           <TextInput
             value={form.password}
             onChangeText={(password) => setForm({ ...form, password })}
-            placeholder="Пароль"
+            placeholder={t('auth.password')}
             secureTextEntry
             placeholderTextColor={colors.muted}
             style={styles.input}
           />
           <View style={styles.reportActions}>
             <Pressable style={styles.secondaryButton} onPress={onClose}>
-              <Text style={styles.secondaryButtonText}>Отмена</Text>
+              <Text style={styles.secondaryButtonText}>{t('auth.cancel')}</Text>
             </Pressable>
             <Pressable style={styles.primaryButton} onPress={onSubmit} disabled={loading}>
-              {loading ? <ActivityIndicator color={colors.surface} /> : <Text style={styles.primaryButtonText}>{isRegister ? 'Создать' : 'Войти'}</Text>}
+              {loading ? <ActivityIndicator color={colors.surface} /> : <Text style={styles.primaryButtonText}>{isRegister ? t('auth.create') : t('auth.login')}</Text>}
             </Pressable>
           </View>
           <Pressable style={styles.linkButton} onPress={switchMode}>
-            <Text style={styles.linkText}>{isRegister ? 'Уже есть аккаунт' : 'Создать аккаунт'}</Text>
+            <Text style={styles.linkText}>{isRegister ? t('auth.haveAccount') : t('auth.registerLink')}</Text>
           </Pressable>
         </View>
       </KeyboardAvoidingView>
@@ -1745,6 +1772,7 @@ function ReportModal({
   onSubmit,
   isSignedIn,
   phoneSettings,
+  t,
   point,
   category,
   setCategory,
@@ -1753,26 +1781,26 @@ function ReportModal({
 }) {
   const layout = usePhoneLayout(phoneSettings);
   const reportCategories = [
-    { key: 'incident', label: 'Событие', icon: 'alert-circle' },
-    { key: 'traffic', label: 'ДТП', icon: 'car' },
-    { key: 'poor_lighting', label: 'Нет света', icon: 'moon' },
-    { key: 'construction', label: 'Ремонт', icon: 'construct' },
-    { key: 'crowd', label: 'Толпа', icon: 'people' },
-    { key: 'underpass', label: 'Переход', icon: 'trail-sign' }
+    { key: 'incident', labelKey: 'reportCategory.incident', icon: 'alert-circle' },
+    { key: 'traffic', labelKey: 'reportCategory.traffic', icon: 'car' },
+    { key: 'poor_lighting', labelKey: 'reportCategory.poor_lighting', icon: 'moon' },
+    { key: 'construction', labelKey: 'reportCategory.construction', icon: 'construct' },
+    { key: 'crowd', labelKey: 'reportCategory.crowd', icon: 'people' },
+    { key: 'underpass', labelKey: 'reportCategory.underpass', icon: 'trail-sign' }
   ];
 
   return (
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
       <View style={styles.modalBackdrop}>
         <View style={[styles.sheet, { paddingBottom: layout.sheetBottomPadding }]}>
-          <Text style={styles.reportTitle}>Сообщить о риске</Text>
+          <Text style={styles.reportTitle}>{t('report.title')}</Text>
           <Text style={styles.reportHint}>
             {isSignedIn
-              ? 'Репорт будет сохранен в базе и привязан к профилю.'
-              : 'Гостевой репорт отправится без привязки к профилю.'}
+              ? t('report.signedHint')
+              : t('report.guestHint')}
           </Text>
           <Text style={styles.reportPointText}>
-            {point?.title || 'Точка'} · {Number(point?.lat).toFixed(5)}, {Number(point?.lng).toFixed(5)}
+            {point?.title || t('report.point')} · {Number(point?.lat).toFixed(5)}, {Number(point?.lng).toFixed(5)}
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.reportCategoryRow}>
             {reportCategories.map((item) => {
@@ -1780,13 +1808,13 @@ function ReportModal({
               return (
                 <Pressable key={item.key} style={[styles.reportCategoryChip, active && styles.reportCategoryChipActive]} onPress={() => setCategory(item.key)}>
                   <Ionicons name={item.icon} size={15} color={active ? colors.surface : colors.muted} />
-                  <Text style={[styles.reportCategoryText, active && styles.reportCategoryTextActive]}>{item.label}</Text>
+                  <Text style={[styles.reportCategoryText, active && styles.reportCategoryTextActive]}>{t(item.labelKey)}</Text>
                 </Pressable>
               );
             })}
           </ScrollView>
           <View style={styles.riskLevel}>
-            <Text style={styles.settingLabel}>Опасность: {severity}</Text>
+            <Text style={styles.settingLabel}>{t('report.danger', { level: severity })}</Text>
             <View style={styles.levelRow}>
               {[1, 2, 3, 4, 5].map((level) => (
                 <Pressable
@@ -1802,17 +1830,17 @@ function ReportModal({
           <TextInput
             value={value}
             onChangeText={onChange}
-            placeholder="Например: темный двор, ремонт тротуара, опасный переход"
+            placeholder={t('report.placeholder')}
             placeholderTextColor={colors.muted}
             multiline
             style={styles.reportInput}
           />
           <View style={styles.reportActions}>
             <Pressable style={styles.secondaryButton} onPress={onClose}>
-              <Text style={styles.secondaryButtonText}>Отмена</Text>
+              <Text style={styles.secondaryButtonText}>{t('auth.cancel')}</Text>
             </Pressable>
             <Pressable style={styles.primaryButton} onPress={onSubmit}>
-              <Text style={styles.primaryButtonText}>Отправить</Text>
+              <Text style={styles.primaryButtonText}>{t('report.send')}</Text>
             </Pressable>
           </View>
         </View>
@@ -1821,12 +1849,12 @@ function ReportModal({
   );
 }
 
-function BottomTabs({ screen, setScreen, phoneSettings }) {
+function BottomTabs({ screen, setScreen, phoneSettings, t }) {
   const layout = usePhoneLayout(phoneSettings);
   const tabs = [
-    { key: 'map', label: 'Карта', icon: 'map' },
-    { key: 'profile', label: 'Профиль', icon: 'person' },
-    { key: 'settings', label: 'Настройки', icon: 'settings' },
+    { key: 'map', labelKey: 'tab.map', icon: 'map' },
+    { key: 'profile', labelKey: 'tab.profile', icon: 'person' },
+    { key: 'settings', labelKey: 'tab.settings', icon: 'settings' },
   ];
   const tabHeight = phoneSettings.largeTouchTargets ? 66 : 58;
 
@@ -1837,7 +1865,7 @@ function BottomTabs({ screen, setScreen, phoneSettings }) {
         return (
           <Pressable key={tab.key} style={[styles.tabButton, { height: tabHeight - 8 }]} onPress={() => setScreen(tab.key)}>
             <Ionicons name={tab.icon} size={21} color={active ? colors.primary : colors.muted} />
-            <Text style={[styles.tabText, active && styles.tabTextActive]}>{tab.label}</Text>
+            <Text style={[styles.tabText, active && styles.tabTextActive]}>{t(tab.labelKey)}</Text>
           </Pressable>
         );
       })}

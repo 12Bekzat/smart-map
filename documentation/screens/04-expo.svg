@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="460" viewBox="0 0 980 460" role="img" aria-label="Expo terminal example">
+  <rect width="980" height="460" rx="8" fill="#111827"/>
+  <rect x="0" y="0" width="980" height="36" rx="8" fill="#374151"/>
+  <text x="24" y="24" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#f9fafb">Terminal 3 - Mobile / Expo</text>
+  <text x="28" y="78" font-family="Consolas, monospace" font-size="18" fill="#e5e7eb">PS C:\Users\toleu\Desktop\smart_maps\mobile&gt; npm run ios</text>
+  <text x="28" y="130" font-family="Consolas, monospace" font-size="18" fill="#cbd5e1">EXPO_PUBLIC_API_URL=http://192.168.1.25:4000</text>
+  <text x="28" y="168" font-family="Consolas, monospace" font-size="18" fill="#cbd5e1">Starting Expo in LAN mode for iPhone.</text>
+  <rect x="28" y="204" width="330" height="192" rx="4" fill="#f9fafb"/>
+  <rect x="54" y="230" width="32" height="32" fill="#111827"/>
+  <rect x="112" y="230" width="32" height="32" fill="#111827"/>
+  <rect x="170" y="230" width="32" height="32" fill="#111827"/>
+  <rect x="228" y="230" width="32" height="32" fill="#111827"/>
+  <rect x="286" y="230" width="32" height="32" fill="#111827"/>
+  <rect x="54" y="288" width="32" height="32" fill="#111827"/>
+  <rect x="112" y="288" width="32" height="32" fill="#111827"/>
+  <rect x="170" y="288" width="32" height="32" fill="#111827"/>
+  <rect x="228" y="288" width="32" height="32" fill="#111827"/>
+  <rect x="286" y="288" width="32" height="32" fill="#111827"/>
+  <rect x="54" y="346" width="32" height="32" fill="#111827"/>
+  <rect x="112" y="346" width="32" height="32" fill="#111827"/>
+  <rect x="170" y="346" width="32" height="32" fill="#111827"/>
+  <rect x="228" y="346" width="32" height="32" fill="#111827"/>
+  <rect x="286" y="346" width="32" height="32" fill="#111827"/>
+  <text x="398" y="252" font-family="Consolas, monospace" font-size="18" fill="#e5e7eb">Metro waiting on exp://192.168.1.25:8081</text>
+  <text x="398" y="300" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#cbd5e1">Scan the QR code in Expo Go.</text>
+  <text x="398" y="338" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#cbd5e1">Do not close this terminal.</text>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="420" viewBox="0 0 980 420" role="img" aria-label="Backend terminal example">
+  <rect width="980" height="420" rx="8" fill="#0f172a"/>
+  <rect x="0" y="0" width="980" height="36" rx="8" fill="#1e293b"/>
+  <text x="24" y="24" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#e2e8f0">Terminal 2 - Backend</text>
+  <text x="28" y="78" font-family="Consolas, monospace" font-size="18" fill="#e5e7eb">PS C:\Users\toleu\Desktop\smart_maps&gt; cd C:\Users\toleu\Desktop\smart_maps\backend</text>
+  <text x="28" y="122" font-family="Consolas, monospace" font-size="18" fill="#e5e7eb">PS C:\Users\toleu\Desktop\smart_maps\backend&gt; npm run dev</text>
+  <text x="28" y="184" font-family="Consolas, monospace" font-size="18" fill="#94a3b8">&gt; safeway-backend@1.0.0 dev</text>
+  <text x="28" y="218" font-family="Consolas, monospace" font-size="18" fill="#94a3b8">&gt; nodemon src/server.js</text>
+  <rect x="26" y="252" width="360" height="38" rx="4" fill="#22c55e"/>
+  <text x="42" y="277" font-family="Consolas, monospace" font-size="18" fill="#052e16">Server listening on port 4000</text>
+  <text x="28" y="346" font-family="Segoe UI, Arial, sans-serif" font-size="17" fill="#cbd5e1">Leave this terminal open while using the app.</text>
+</svg>

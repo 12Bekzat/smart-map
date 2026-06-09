@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SafeWay Simulation Screens</title>
+  <style>
+    :root {
+      --canvas: #F6F7F2;
+      --surface: #FFFFFF;
+      --ink: #18201B;
+      --muted: #68746B;
+      --line: #E1E6DE;
+      --primary: #146C43;
+      --primary-soft: #DDEFE5;
+      --accent: #1267A8;
+      --warning: #D77822;
+      --danger: #C84C3A;
+      --dark: #1F2933;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #DDE5DD;
+      color: var(--ink);
+      font-family: Inter, Arial, sans-serif;
+      display: grid;
+      grid-template-columns: repeat(3, 390px);
+      gap: 32px;
+      padding: 32px;
+      letter-spacing: 0;
+    }
+
+    body.single {
+      grid-template-columns: 390px;
+      place-content: start center;
+      padding: 24px;
+      background: #DDE5DD;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      overflow: hidden;
+      position: relative;
+      background: var(--canvas);
+      border: 1px solid #C9D4CA;
+      border-radius: 28px;
+      box-shadow: 0 24px 54px rgba(24, 32, 27, 0.22);
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      padding: 18px;
+    }
+
+    .page {
+      padding-bottom: 96px;
+    }
+
+    h1 {
+      margin: 22px 0 14px;
+      font-size: 28px;
+      line-height: 34px;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 22px;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .hero {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .avatar,
+    .phone-icon {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: var(--surface);
+      font-size: 24px;
+      font-weight: 900;
+      background: var(--primary);
+    }
+
+    .phone-icon {
+      background: var(--dark);
+      font-size: 25px;
+    }
+
+    .copy {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .name {
+      font-size: 19px;
+      line-height: 23px;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .meta,
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 18px;
+      font-weight: 600;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .metric {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      min-height: 76px;
+    }
+
+    .metric-value {
+      font-size: 22px;
+      line-height: 27px;
+      font-weight: 900;
+    }
+
+    .metric-label {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .info {
+      background: var(--primary-soft);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .info-title {
+      color: var(--primary);
+      font-size: 15px;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .button-row,
+    .pill-row,
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .button {
+      height: 48px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 15px;
+      background: var(--primary);
+      color: var(--surface);
+    }
+
+    .button.secondary {
+      color: var(--ink);
+      background: var(--surface);
+      border: 1px solid var(--line);
+    }
+
+    .pill,
+    .check {
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--canvas);
+      padding: 8px 12px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .pill.active {
+      background: var(--dark);
+      border-color: var(--dark);
+      color: var(--surface);
+    }
+
+    .check.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--surface);
+    }
+
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 58px;
+      align-items: center;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+
+    .toggle-row:first-of-type {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .label {
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 20px;
+      margin-bottom: 3px;
+    }
+
+    .switch {
+      width: 48px;
+      height: 28px;
+      border-radius: 99px;
+      background: var(--primary-soft);
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .switch:after {
+      content: "";
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+
+    .bottom-tabs {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 54px;
+      height: 66px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 8px;
+      box-shadow: 0 12px 24px rgba(17, 24, 39, 0.14);
+    }
+
+    .tab {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 18px;
+    }
+
+    .tab.active {
+      color: var(--primary);
+    }
+
+    .tab-icon {
+      font-size: 20px;
+      line-height: 22px;
+      display: block;
+    }
+
+    .map {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(30deg, transparent 47%, rgba(20,108,67,0.08) 48%, rgba(20,108,67,0.08) 52%, transparent 53%),
+        linear-gradient(120deg, transparent 46%, rgba(18,103,168,0.10) 47%, rgba(18,103,168,0.10) 53%, transparent 54%),
+        repeating-linear-gradient(0deg, #ECF0E9, #ECF0E9 36px, #E2E8E0 37px),
+        repeating-linear-gradient(90deg, transparent, transparent 52px, rgba(104,116,107,0.16) 53px);
+    }
+
+    .route-line {
+      position: absolute;
+      left: 95px;
+      top: 150px;
+      width: 190px;
+      height: 420px;
+    }
+
+    .route-line svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .map-marker {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 3px solid var(--surface);
+      box-shadow: 0 2px 8px rgba(24,32,27,0.28);
+    }
+
+    .marker-start {
+      left: 94px;
+      top: 145px;
+      background: var(--primary);
+    }
+
+    .marker-end {
+      left: 267px;
+      top: 557px;
+      background: var(--accent);
+    }
+
+    .marker-police,
+    .marker-hospital {
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      font-weight: 900;
+      box-shadow: 0 4px 14px rgba(24,32,27,0.22);
+    }
+
+    .marker-police {
+      background: #1D4ED8;
+    }
+
+    .marker-hospital {
+      background: var(--danger);
+    }
+
+    .top-bar {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      top: 42px;
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.94);
+      border-radius: 8px;
+      padding: 10px 16px;
+      box-shadow: 0 12px 24px rgba(17, 24, 39, 0.14);
+    }
+
+    .search-box {
+      flex: 1;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      background: var(--canvas);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .search-title {
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .search-subtitle {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 156px;
+    }
+
+    .brand {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 24px;
+    }
+
+    .city {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .route-card {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 128px;
+      background: rgba(255,255,255,0.98);
+      border-radius: 8px;
+      padding: 14px;
+      box-shadow: 0 12px 24px rgba(17, 24, 39, 0.14);
+    }
+
+    .route-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .score {
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: var(--primary);
+      background: var(--primary-soft);
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 22px;
+    }
+
+    .score span {
+      display: block;
+      margin-top: -6px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .route-title {
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 22px;
+    }
+
+    .route-subtitle {
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 14px;
+    }
+
+    .route-actions {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .small-button {
+      min-height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: var(--surface);
+      background: var(--primary);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .small-button.light {
+      color: var(--ink);
+      background: var(--canvas);
+      border: 1px solid var(--line);
+    }
+
+    .point-list {
+      margin-top: 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .point {
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 8px;
+      background: var(--canvas);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .insights {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .insight {
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      background: #FFF8ED;
+      font-size: 13px;
+      line-height: 18px;
+    }
+
+    .insight.safe {
+      background: var(--primary-soft);
+    }
+
+    .legend {
+      position: absolute;
+      left: 16px;
+      bottom: 210px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      width: fit-content;
+      height: 30px;
+      padding: 0 10px;
+      color: var(--surface);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      box-shadow: 0 8px 18px rgba(24,32,27,0.14);
+    }
+
+    .blue {
+      background: #1D4ED8;
+    }
+
+    .red {
+      background: var(--danger);
+    }
+  </style>
+</head>
+<body>
+  <div id="profile-screen" class="phone">
+    <div class="screen page">
+      <h1>Профиль</h1>
+      <div class="hero">
+        <div class="avatar">G</div>
+        <div class="copy">
+          <div class="name">Гость</div>
+          <div class="meta">Данные и настройки хранятся на этом телефоне</div>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="metric"><div class="metric-value">100</div><div class="metric-label">Индекс</div></div>
+        <div class="metric"><div class="metric-value">4 мин</div><div class="metric-label">Время</div></div>
+        <div class="metric"><div class="metric-value">1</div><div class="metric-label">Риски</div></div>
+        <div class="metric"><div class="metric-value">8</div><div class="metric-label">Зоны</div></div>
+      </div>
+      <div class="button-row">
+        <div class="button" style="flex: 1;">Войти</div>
+        <div class="button secondary" style="flex: 1;">Регистрация</div>
+      </div>
+      <div class="info" style="margin-top: 14px;">
+        <div class="info-title">Как работает режим гостя</div>
+        <div class="meta">Без аккаунта SafeWay сохраняет настройки маршрута локально на устройстве. После входа или регистрации эти настройки синхронизируются с PostgreSQL и будут доступны на другом устройстве.</div>
+      </div>
+    </div>
+    <div class="bottom-tabs">
+      <div class="tab"><span class="tab-icon">▧</span>Карта</div>
+      <div class="tab active"><span class="tab-icon">●</span>Профиль</div>
+      <div class="tab"><span class="tab-icon">⚙</span>Настройки</div>
+    </div>
+  </div>
+
+  <div id="settings-screen" class="phone">
+    <div class="screen page">
+      <h1>Настройки маршрута</h1>
+      <div class="section">
+        <h2>Язык</h2>
+        <div class="pill-row">
+          <div class="pill">Қазақша</div>
+          <div class="pill active">Русский</div>
+          <div class="pill">English</div>
+          <div class="pill">中文</div>
+        </div>
+        <div class="hint" style="margin-top: 10px;">Интерфейс переключится сразу и сохранится на этом телефоне.</div>
+      </div>
+      <div class="section">
+        <h2>Приоритет</h2>
+        <div class="pill-row">
+          <div class="pill">Самый безопасный</div>
+          <div class="pill active">Баланс</div>
+          <div class="pill">Быстрее</div>
+        </div>
+      </div>
+      <div class="section">
+        <h2>Тип движения</h2>
+        <div class="pill-row">
+          <div class="pill">⚡ Самокат</div>
+          <div class="pill active">🚶 Пешком</div>
+          <div class="pill">🚘 Авто</div>
+          <div class="pill">🚲 Вело</div>
+        </div>
+      </div>
+      <div class="section">
+        <h2>Избегать</h2>
+        <div class="chip-row">
+          <div class="check active">✓ Темные улицы</div>
+          <div class="check active">✓ Подземные переходы</div>
+          <div class="check">○ Трафик</div>
+          <div class="check">○ Толпы</div>
+          <div class="check">○ Ремонт</div>
+          <div class="check">○ Склоны</div>
+        </div>
+      </div>
+      <div class="section">
+        <h2>Безопасность</h2>
+        <div class="toggle-row">
+          <div class="copy"><div class="label">Ночной маршрут</div><div class="hint">Усиливает штраф за плохо освещенные зоны.</div></div>
+          <div class="switch"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="copy"><div class="label">Предпочитать освещенные улицы</div><div class="hint">Автоматически избегает зон плохого освещения.</div></div>
+          <div class="switch"></div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-tabs">
+      <div class="tab"><span class="tab-icon">▧</span>Карта</div>
+      <div class="tab"><span class="tab-icon">●</span>Профиль</div>
+      <div class="tab active"><span class="tab-icon">⚙</span>Настройки</div>
+    </div>
+  </div>
+
+  <div id="route-screen" class="phone">
+    <div class="map">
+      <div class="route-line">
+        <svg viewBox="0 0 190 420" aria-hidden="true">
+          <path d="M10 10 C28 58, 142 75, 150 122 S65 207, 82 260 S160 325, 172 405" fill="none" stroke="rgba(18,103,168,0.28)" stroke-width="14" stroke-linecap="round"/>
+          <path d="M10 10 C28 58, 142 75, 150 122 S65 207, 82 260 S160 325, 172 405" fill="none" stroke="#146C43" stroke-width="7" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="map-marker marker-start"></div>
+      <div class="map-marker marker-end"></div>
+      <div class="marker-police" style="left: 142px; top: 260px;">P</div>
+      <div class="marker-police" style="left: 244px; top: 210px;">P</div>
+      <div class="marker-hospital" style="left: 178px; top: 314px;">H</div>
+      <div class="marker-hospital" style="left: 118px; top: 365px;">H</div>
+      <div class="top-bar">
+        <div class="search-box">
+          <div>⌕</div>
+          <div class="copy">
+            <div class="search-title">Куда едем?</div>
+            <div class="search-subtitle">Найти улицу, место или безопасную зону</div>
+          </div>
+        </div>
+        <div>
+          <div class="brand">SafeWay</div>
+          <div class="city">Алматы</div>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-chip blue">P 11 участков</div>
+        <div class="legend-chip red">H 11 больниц</div>
+      </div>
+      <div class="route-card">
+        <div class="route-head">
+          <div class="score">100<span>индекс</span></div>
+          <div class="copy">
+            <div class="route-title">Очень безопасно</div>
+            <div class="route-subtitle">2.69 км · 4 мин</div>
+          </div>
+          <div style="font-size: 22px;">×</div>
+        </div>
+        <div class="route-actions">
+          <div class="small-button">▶ Начать маршрут</div>
+          <div class="small-button light">⌄ Скрыть окно</div>
+        </div>
+        <div class="point-list">
+          <div class="point"><span class="dot" style="background: var(--primary);"></span>1. Метро Алмалы</div>
+          <div class="point"><span class="dot" style="background: var(--accent);"></span>2. Dostyk Plaza</div>
+        </div>
+        <div class="insights">
+          <div class="insight safe">🛡 Освещение: Dostyk Avenue active corridor</div>
+          <div class="insight safe">🛡 Людные: Panfilov pedestrian street</div>
+          <div class="insight">⚠ ДТП / трафик: Abay / Dostyk crossing</div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-tabs">
+      <div class="tab active"><span class="tab-icon">▧</span>Карта</div>
+      <div class="tab"><span class="tab-icon">●</span>Профиль</div>
+      <div class="tab"><span class="tab-icon">⚙</span>Настройки</div>
+    </div>
+  </div>
+  <script>
+    const targetId = window.location.hash.replace('#', '');
+    if (targetId) {
+      document.body.classList.add('single');
+      document.querySelectorAll('.phone').forEach((phone) => {
+        phone.style.display = phone.id === targetId ? 'block' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>
